@@ -1,24 +1,19 @@
 //YOUR CODE HERE:
-var message = {
+var defaultMessage = {
   username: 'shawndrost',
   text: 'trololo',
-  roomname: '4chan'
+  roomname: '4chan',
+  tag: "KK"
 };
 
+var ourMessages = []
 var friends = {};
 var app = {};
 app.init = function(){};
 var messages;
 app.server = 'https://api.parse.com/1/classes/chatterbox'
 
-app.send = function(message , user){
-  if(typeof message !== "object"){
-    message = {
-      text: message,
-      userName: user || userName
-    }
-  }
-
+app.send = function(message , user, roomname, tag){
   $.ajax({
     // This is the url you should use to communicate with the parse API server.
     url: app.server,
@@ -41,11 +36,12 @@ app.fetch = function(){
     // This is the url you should use to communicate with the parse API server.
     url: app.server,
     type: 'GET',
-    data: JSON.stringify(message),
     contentType: 'application/json',
     success: function (data) {
+      if(data.results.roomname){console.log('tagged')}
       console.log('chatterbox: Message recieved');
-      //console.log(data);
+
+      console.log(data);
       messages = data;
     },
     error: function (data) {
@@ -57,7 +53,6 @@ app.fetch = function(){
   $(document).ajaxSuccess(function() {
     //$( ".log" ).text( "Triggered ajaxSuccess handler." );
     displayMessages()
-    console.log(messages,"AJAX SUCCESS")
   });
 }
 
@@ -65,14 +60,26 @@ app.clearMessages = function() {
   $("#chats").empty()
 }
 
-app.addMessage = function(message) {
-  app.send(message);
+app.addMessage = function(message, user, roomname, tag) {
+if(typeof message !== "object"){
+    message = {
+      text: message,
+      username: user || defaultMessage.username,
+      roomname: roomname || defaultMessage.roomname,
+      tag: tag
+    }
+    app.send(message);
+  }
+  else{
+    message.tag = defaultMessage.tag
+    app.send(message);
+  }
   app.fetch();
 }
 
 
-app.addRoom = function(roomName){ 
-  $("#roomSelect").append("<div class = room>"+roomName+ "</div>");
+app.addRoom = function(roomname){ 
+  $("#roomSelect").append("<div class = room>"+roomname+ "</div>");
 }
 
 app.addFriend = function(friend) {
@@ -80,13 +87,8 @@ app.addFriend = function(friend) {
   console.log("Frand")
 };
 
-
-
-
-
 var displayMessages = function() {
   app.clearMessages();
-  console.log(messages, "AJAX FETCH");
   for (var i = 0; i < messages.results.length; i++) {
     if(messages.results[i].text){
       var text = escapeHtml(messages.results[i].text)
@@ -111,11 +113,11 @@ function escapeHtml(str) {
 };
 
 $(document).ready(function(){
-  console.log("READY");
   $('#main').on('click','.username',function(){
     // console.log(this.textContent)
     var friend = this.textContent; 
     app.addFriend(friend)
   });
   app.fetch();
+  setInterval(app.fetch, 4000);
 });
