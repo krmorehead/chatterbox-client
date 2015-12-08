@@ -70,6 +70,9 @@ div .username {
     padding: 5px;
     font-weight:800;
 }
+.username:hover{
+    color:blue;
+}
 
 .chat:hover {
     background-color: #ddd;

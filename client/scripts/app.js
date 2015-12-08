@@ -5,10 +5,10 @@ var message = {
   roomname: '4chan'
 };
 
-var userName = "us"
+var friends = {};
 var app = {};
 app.init = function(){};
-var messages = false;
+var messages;
 app.server = 'https://api.parse.com/1/classes/chatterbox'
 
 app.send = function(message , user){
@@ -46,7 +46,7 @@ app.fetch = function(){
     success: function (data) {
       console.log('chatterbox: Message recieved');
       //console.log(data);
-      messages = data.results;
+      messages = data;
     },
     error: function (data) {
       // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -56,8 +56,8 @@ app.fetch = function(){
 
   $(document).ajaxSuccess(function() {
     //$( ".log" ).text( "Triggered ajaxSuccess handler." );
-    displayMessages(messages)
-    console.log(messages)
+    displayMessages()
+    console.log(messages,"AJAX SUCCESS")
   });
 }
 
@@ -66,43 +66,43 @@ app.clearMessages = function() {
 }
 
 app.addMessage = function(message) {
-  $("#chats div:last-child").append("<span class = chat>" + message+"</span>")
-  //displayMessages();
+  app.send(message);
+  app.fetch();
 }
-app.addUsername = function(message) {
-  $("#chats").append("<div class = username>" + message+"</div>")
-  //displayMessages();
-}
+
 
 app.addRoom = function(roomName){ 
   $("#roomSelect").append("<div class = room>"+roomName+ "</div>");
 }
 
-app.addFriend = function() {};
+app.addFriend = function(friend) {
+  friends[friend] = true
+  console.log("Frand")
+};
 
 
 
 
-var addToFriendsList = function() {
 
-}
-
-var displayMessages = function(msgObj) {
-
-  //check
-  if(messages !== undefined){
-    msgObj = msgObj || messages;
-    app.clearMessages();
-    for (var i = 0; i < msgObj.length; i++) {
-      if(msgObj[i].text){
-        var text = escapeHtml(msgObj[i].text)
-        var username = escapeHtml(msgObj[i].username);
-        app.addUsername(username)
-        app.addMessage(text)
+var displayMessages = function() {
+  app.clearMessages();
+  console.log(messages, "AJAX FETCH");
+  for (var i = 0; i < messages.results.length; i++) {
+    if(messages.results[i].text){
+      var text = escapeHtml(messages.results[i].text)
+      var username = escapeHtml(messages.results[i].username);
+      if(friends[username]){
+        $("#chats:last-child").append("<span class = username>" + username+"</span>")
+        $("#chats").append("<div class = chat><strong>"+text+"</strong></div>")      
+      }
+      else{
+        $("#chats:last-child").append("<span class = username>" + username+"</span>")
+        $("#chats").append("<div class = chat>" + text +"</div>")
       }
     }
   }
 }
+
 
 function escapeHtml(str) {
     var div = document.createElement('div');
@@ -110,6 +110,12 @@ function escapeHtml(str) {
     return div.innerHTML;
 };
 
-
-$('.username').on("click",app.addFriend());
-app.fetch()
+$(document).ready(function(){
+  console.log("READY");
+  $('#main').on('click','.username',function(){
+    // console.log(this.textContent)
+    var friend = this.textContent; 
+    app.addFriend(friend)
+  });
+  app.fetch();
+});
