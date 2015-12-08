@@ -5,14 +5,21 @@ body {
     font-family: arial, sans-serif;
 }
 
-#main, #chats {
+#main, #chats, #textarea {
     width: 90%;
     margin: auto;
     text-align: left;
-    background: white;
     padding: 50px 50px;
-    border: solid #ddd;
-    border-width: 1px 1px 1px 1px;
+    border: solid black;
+    border-width: 2px 2px 2px 2px;
+}
+
+#chats{
+    background-color: #eeeec4;
+}
+div{
+    background-color: beige;
+    border-radius: 5px
 }
 
 #main h1 {
@@ -61,14 +68,24 @@ form input[type=text] {
 
 .chat {
     margin:0 0 0 10px;
+    background-color: #00bfff;
     padding: 5px;
     margin-bottom: 5px;
-    background-color: #eee;
+    display:inline-block;
+    color:white;
 }
 
+.friend{
+    background-color:  #ffb31a;
+}
 div .username {
+
     padding: 5px;
     font-weight:800;
+}
+
+div .user{
+    background-color: green
 }
 .username:hover{
     color:blue;
@@ -93,8 +110,24 @@ div .username {
     margin: auto;
     margin-bottom: 10px;
     text-align: left;
-    background: white;
     padding: 0px 50px 50px ;
-    border: solid #ddd;
-    border-width: 1px  1px 1px 1px;
+}
+
+#textarea {
+    margin-bottom: 10px;
+    padding-bottom: 25px;
+    padding-top:25px;
+    background-color: #eeeec4;
+}
+input{
+    margin:0 5% 0 0;
+    height:100px;
+    width:100%
+}
+
+img{
+    position: absolute;
+    right: 5%;
+    top:2%;
+    width: 250px;
 }

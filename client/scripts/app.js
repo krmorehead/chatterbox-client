@@ -1,12 +1,11 @@
 //YOUR CODE HERE:
-var defaultMessage = {
-  username: 'shawndrost',
+var def = {
+  username: 'anon',
   text: 'trololo',
-  roomname: '4chan',
-  tag: "KK"
+  roomname: 'lobby',
 };
-
-var ourMessages = []
+var rooms = {"lobby" : "lobby"}
+var userRooms = {}
 var friends = {};
 var app = {};
 app.init = function(){};
@@ -40,7 +39,6 @@ app.fetch = function(){
     success: function (data) {
       if(data.results.roomname){console.log('tagged')}
       console.log('chatterbox: Message recieved');
-
       console.log(data);
       messages = data;
     },
@@ -57,29 +55,47 @@ app.fetch = function(){
 }
 
 app.clearMessages = function() {
-  $("#chats").empty()
+  $(".username").remove();
+  $(".chat").remove();
+  $("#chats br").remove();
 }
 
 app.addMessage = function(message, user, roomname, tag) {
 if(typeof message !== "object"){
     message = {
       text: message,
-      username: user || defaultMessage.username,
-      roomname: roomname || defaultMessage.roomname,
+      username: user || def.username,
+      roomname: roomname || def.roomname,
       tag: tag
     }
     app.send(message);
   }
   else{
-    message.tag = defaultMessage.tag
+    message.tag = def.tag
     app.send(message);
   }
   app.fetch();
 }
 
 
-app.addRoom = function(roomname){ 
-  $("#roomSelect").append("<div class = room>"+roomname+ "</div>");
+var submit = function() {
+  var room = $('.roomInput')[0].value
+  if(room.length){
+    def.roomname = room;
+  }
+  var message = $(".messageInput")[0].value
+  if(message.length){
+    app.addMessage(message, def.username, def.roomname);
+  }
+}
+
+
+app.renderRoom = function(roomname ){
+  $("#roomSelect").append("<button class = room>"+roomname+ "</button>");
+}
+
+app.addRoom = function(roomname){
+  userRooms[roomname] = roomname
 }
 
 app.addFriend = function(friend) {
@@ -88,20 +104,45 @@ app.addFriend = function(friend) {
 };
 
 var displayMessages = function() {
+  rooms = {}
   app.clearMessages();
   for (var i = 0; i < messages.results.length; i++) {
     if(messages.results[i].text){
-      var text = escapeHtml(messages.results[i].text)
+      var roomname = escapeHtml(messages.results[i].roomname);
+      var text = escapeHtml(messages.results[i].text);
       var username = escapeHtml(messages.results[i].username);
-      if(friends[username]){
-        $("#chats:last-child").append("<span class = username>" + username+"</span>")
-        $("#chats").append("<div class = chat><strong>"+text+"</strong></div>")      
+      if(!roomname.length){
+        roomname = "lobby"
       }
-      else{
-        $("#chats:last-child").append("<span class = username>" + username+"</span>")
-        $("#chats").append("<div class = chat>" + text +"</div>")
+
+      rooms[roomname] = roomname
+      if(roomname === def.roomname){
+        if(!username.length){
+          username = "anon"
+        }
+        if(username === def.username){
+          $("#chats").append("<span class = username>" + username+"</span>")
+          $("#chats").append("<div class = 'chat user'>"+text+"</div><br>")
+        }else if(friends[username]){
+          $("#chats").append("<span class = username>" + username+"</span>")
+          $("#chats").append("<div class = 'chat friend'>"+text+"</div><br>")      
+        }
+        else{
+          $("#chats").append("<span class = username>" + username+"</span>")
+          $("#chats").append("<div class = chat>" + text +"</div><br>")
+        }
       }
     }
+  }
+  //add roomnames to ul
+  $('.room').remove()
+  for(var keys in rooms){
+
+    app.renderRoom(keys)
+  }
+  for(var keys in userRooms){
+
+    app.renderRoom(keys)
   }
 }
 
@@ -113,11 +154,25 @@ function escapeHtml(str) {
 };
 
 $(document).ready(function(){
+  def.username = window.prompt("Please enter your username", undefined) || def.username;
+  
+  // ON USERNAME CLICK
   $('#main').on('click','.username',function(){
     // console.log(this.textContent)
     var friend = this.textContent; 
     app.addFriend(friend)
+    app.fetch()
   });
+
+  // ON SUBMIT CLICK
+  $('#main').on('click','.messageButton',submit);
+
+  $('#main').on('click','.room',function(){
+    def.roomname = this.textContent;
+    displayMessages();
+    console.log("CHANGED ROOMS?")
+  });
+
   app.fetch();
   setInterval(app.fetch, 4000);
 });
