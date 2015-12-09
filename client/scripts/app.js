@@ -84,6 +84,7 @@ var submit = function() {
     def.roomname = room;
   }
   var message = $(".messageInput")[0].value
+  $('.messageInput').value = '';
   if(message.length){
     app.addMessage(message, def.username, def.roomname);
   }
